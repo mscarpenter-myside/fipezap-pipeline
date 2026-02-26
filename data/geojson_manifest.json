@@ -1,0 +1,79 @@
+[
+    {
+        "cidade": "Florianópolis",
+        "arquivo_original": "Florianópolis.geojson",
+        "arquivo_final": "data/geojsons_simplificados/Florianópolis.geojson",
+        "tamanho_original_kb": 1351.1,
+        "tamanho_final_kb": 55.4,
+        "reducao_porcentagem": 95.9,
+        "num_features": 73,
+        "coluna_bairro_detectada": "name",
+        "status": "OK"
+    },
+    {
+        "cidade": "Vitória",
+        "arquivo_original": "Vitória.geojson",
+        "arquivo_final": "data/geojsons_simplificados/Vitória.geojson",
+        "tamanho_original_kb": 860.8,
+        "tamanho_final_kb": 44.5,
+        "reducao_porcentagem": 94.8,
+        "num_features": 90,
+        "coluna_bairro_detectada": "name",
+        "status": "OK"
+    },
+    {
+        "cidade": "Curitiba ",
+        "arquivo_original": "Curitiba .geojson",
+        "arquivo_final": "data/geojsons_simplificados/Curitiba .geojson",
+        "tamanho_original_kb": 710.3,
+        "tamanho_final_kb": 31.0,
+        "reducao_porcentagem": 95.6,
+        "num_features": 72,
+        "coluna_bairro_detectada": "name",
+        "status": "OK"
+    },
+    {
+        "cidade": "RIO DE JANEIRO ",
+        "arquivo_original": "RIO DE JANEIRO .geojson",
+        "arquivo_final": "data/geojsons_simplificados/RIO DE JANEIRO .geojson",
+        "tamanho_original_kb": 3947.6,
+        "tamanho_final_kb": 276.3,
+        "reducao_porcentagem": 93.0,
+        "num_features": 1458,
+        "coluna_bairro_detectada": "name",
+        "status": "OK"
+    },
+    {
+        "cidade": "SÃO PAULO",
+        "arquivo_original": "SÃO PAULO.geojson",
+        "arquivo_final": "data/geojsons_simplificados/SÃO PAULO.geojson",
+        "tamanho_original_kb": 2618.2,
+        "tamanho_final_kb": 90.3,
+        "reducao_porcentagem": 96.6,
+        "num_features": 117,
+        "coluna_bairro_detectada": "name",
+        "status": "OK"
+    },
+    {
+        "cidade": "RIO DE JANEIRO",
+        "arquivo_original": "RIO DE JANEIRO.geojson",
+        "arquivo_final": "data/geojsons_simplificados/RIO DE JANEIRO.geojson",
+        "tamanho_original_kb": 3243.6,
+        "tamanho_final_kb": 162.2,
+        "reducao_porcentagem": 95.0,
+        "num_features": 172,
+        "coluna_bairro_detectada": "name",
+        "status": "OK"
+    },
+    {
+        "cidade": "Maceió",
+        "arquivo_original": "Maceió.geojson",
+        "arquivo_final": "data/geojsons_simplificados/Maceió.geojson",
+        "tamanho_original_kb": 286.1,
+        "tamanho_final_kb": 42.7,
+        "reducao_porcentagem": 85.1,
+        "num_features": 67,
+        "coluna_bairro_detectada": "name",
+        "status": "OK"
+    }
+]

@@ -1,0 +1,9 @@
+venv/
+credentials/
+__pycache__/
+*.xlsx
+*.csv
+*Zone.Identifier
+.ipynb_checkpoints/
+data/raw/
+*.resolved

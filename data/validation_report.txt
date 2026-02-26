@@ -1,0 +1,67 @@
+==============================================================
+RELATÓRIO DE VALIDAÇÃO ETL — FipeZAP (Insensível à Ordem)
+==============================================================
+Abas validadas            : 10
+Abas sem referência       : ['2025-02', '2025-03']
+Abas na ref não geradas   : []
+
+[2025-04] Rows: 220/220 | Matches: 218 | Acc: 99.09% | ❌ FAIL
+  FALTANDO: ('cuiabá (mt)', 'dos araés', 'r$ 4.158', '0,047')
+  FALTANDO: ('goiânia (go)', 'pedro ludovico/bela vista', 'r$ 7.799', '0,118')
+  EXTRA   : ('goiânia (go)', 'pedro ludovico/bela…', 'r$ 7.799', '0,118')
+  EXTRA   : ('cuiabá (mt)', 'dos arães', 'r$ 4.158', '0,047')
+[2025-05] Rows: 220/220 | Matches: 213 | Acc: 96.82% | ❌ FAIL
+  FALTANDO: ('natal (rn)', 'neópolis', 'r$ 5.540', '0,034')
+  FALTANDO: ('natal (rn)', 'petrópolis', 'r$ 5.932', '0,193')
+  FALTANDO: ('goiânia (go)', 'pedro ludovico/bela vista', 'r$ 7.692', '0,079')
+  EXTRA   : ('natal (rn)', 'neópolis', 'r$ 5.254', '0,034')
+  EXTRA   : ('natal (rn)', 'candelária', 'r$ 4.846', '0,063')
+[2025-06] Rows: 220/220 | Matches: 0 | Acc: 0.00% | ❌ FAIL
+  FALTANDO: ('rio de janeiro (rj)', 'laranjeiras', 'r$ 10.635', '0,04361')
+  FALTANDO: ('salvador (ba)', 'ondina', 'r$ 9.515', '0,18964')
+  FALTANDO: ('curitiba (pr)', 'batel', 'r$ 17.543', '0,24768')
+  EXTRA   : ('salvador (ba)', 'rio vermelho', 'r$ 9.189', '0,098')
+  EXTRA   : ('goiânia (go)', 'central', 'r$ 4.730', '0,203')
+[2025-07] Rows: 220/220 | Matches: 218 | Acc: 99.09% | ❌ FAIL
+  FALTANDO: ('cuiabá (mt)', 'dos araés', 'r$ 4.520', '0,146')
+  FALTANDO: ('goiânia (go)', 'pedro ludovico/bela vista', 'r$ 7.632', '0,032')
+  EXTRA   : ('cuiabá (mt)', 'dos arães', 'r$ 4.520', '0,146')
+  EXTRA   : ('goiânia (go)', 'pedro ludovico/bela…', 'r$ 7.632', '0,032')
+[2025-08] Rows: 220/220 | Matches: 218 | Acc: 99.09% | ❌ FAIL
+  FALTANDO: ('goiânia (go)', 'pedro ludovico/bela vista', 'r$ 7.655', '0,019')
+  FALTANDO: ('cuiabá (mt)', 'dos araés', 'r$ 4.602', '0,14')
+  EXTRA   : ('goiânia (go)', 'pedro ludovico/bela…', 'r$ 7.655', '0,019')
+  EXTRA   : ('cuiabá (mt)', 'dos arães', 'r$ 4.602', '0,14')
+[2025-09] Rows: 220/220 | Matches: 215 | Acc: 97.73% | ❌ FAIL
+  FALTANDO: ('cuiabá (mt)', 'dos araés', 'r$ 4.644', '0,127')
+  FALTANDO: ('manaus (am)', 'adrianópolis', 'r$ 9.603', '0,212')
+  FALTANDO: ('goiânia (go)', 'pedro ludovico/bela vista', 'r$ 7.691', '0,012')
+  EXTRA   : ('manaus (am)', 'adrianópolis', 'r$ 9.603', '0,216')
+  EXTRA   : ('goiânia (go)', 'pedro ludovico/bela…', 'r$ 7.691', '0,012')
+[2025-10] Rows: 220/220 | Matches: 218 | Acc: 99.09% | ❌ FAIL
+  FALTANDO: ('goiânia (go)', 'pedro ludovico/bela vista', 'r$ 7.774', '0,016')
+  FALTANDO: ('cuiabá (mt)', 'dos araés', 'r$ 4.758', '0,135')
+  EXTRA   : ('goiânia (go)', 'pedro ludovico/bela…', 'r$ 7.774', '0,016')
+  EXTRA   : ('cuiabá (mt)', 'dos arães', 'r$ 4.758', '0,135')
+[2025-11] Rows: 220/220 | Matches: 218 | Acc: 99.09% | ❌ FAIL
+  FALTANDO: ('goiânia (go)', 'pedro ludovico/bela vista', 'r$ 7.858', '0,02')
+  FALTANDO: ('cuiabá (mt)', 'dos araés', 'r$ 4.836', '0,146')
+  EXTRA   : ('cuiabá (mt)', 'dos arães', 'r$ 4.836', '0,146')
+  EXTRA   : ('goiânia (go)', 'pedro ludovico/bela…', 'r$ 7.858', '0,02')
+[2025-12] Rows: 220/220 | Matches: 216 | Acc: 98.18% | ❌ FAIL
+  FALTANDO: ('goiânia (go)', 'pedro ludovico/bela vista', 'r$ 7.923', '0,018')
+  FALTANDO: ('salvador (ba)', 'pernambués', 'r$ 8.383', '0,157')
+  FALTANDO: ('manaus (am)', 'compensa', 'r$ 5.130', '0,19')
+  EXTRA   : ('goiânia (go)', 'pedro ludovico/bela…', 'r$ 7.923', '0,018')
+  EXTRA   : ('salvador (ba)', 'pernambués', 'r$ 8.388', '0,157')
+[2026-01] Rows: 220/220 | Matches: 19 | Acc: 8.64% | ❌ FAIL
+  FALTANDO: ('goiânia (go)', 'jardim goiás', 'r$ 9.433', '0,01')
+  FALTANDO: ('goiânia (go)', 'marista', 'r$ 11.224', '0,03')
+  FALTANDO: ('porto alegre (rs)', 'petrópolis', 'r$ 9.902', '0,03')
+  EXTRA   : ('fortaleza (ce)', 'meireles', 'r$ 12.680', '0,129')
+  EXTRA   : ('belo horizonte (mg)', 'serra', 'r$ 11.098', '0,175')
+
+==============================================================
+ACURÁCIA GLOBAL: 79.68%
+❌ ETL FALHOU — Corrigir divergências acima
+==============================================================
