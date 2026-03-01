@@ -70,6 +70,15 @@ def main():
         # 2. Buscar dados FipeZAP
         fipe_df = get_fipezap_data(client, city_name)
         
+        # Calcular posição (Ranking) baseado no Valor do m²
+        if not fipe_df.empty:
+            fipe_df['Valor_Num'] = fipe_df['Valor do m²'].astype(str).str.replace(r'[^\d]', '', regex=True)
+            fipe_df['Valor_Num'] = pd.to_numeric(fipe_df['Valor_Num'], errors='coerce').fillna(0)
+            fipe_df = fipe_df.sort_values(by='Valor_Num', ascending=False).reset_index(drop=True)
+            fipe_df['Posição'] = range(1, len(fipe_df) + 1)
+        else:
+            fipe_df['Posição'] = []
+            
         # 3. Montar tabela sincronizada
         rows = []
         for item_geo in neighborhoods_data:
@@ -81,6 +90,7 @@ def main():
                 row_data = match.iloc[0].to_dict()
                 rows.append({
                     "Bairro": bairro,
+                    "Posição": row_data.get("Posição", ""),
                     "Valor do m²": row_data.get("Valor do m²", ""),
                     "Variação (12 meses)": row_data.get("Variação (12 meses)", ""),
                     "Destaque": "Sim",
@@ -90,6 +100,7 @@ def main():
             else:
                 rows.append({
                     "Bairro": bairro,
+                    "Posição": "",
                     "Valor do m²": "",
                     "Variação (12 meses)": "",
                     "Destaque": "Não",

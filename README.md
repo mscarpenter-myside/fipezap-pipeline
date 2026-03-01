@@ -17,3 +17,14 @@ Este projeto é um pipeline de dados (ETL) e processamento geoespacial construí
 *   `pdfplumber` (Extração de texto de PDF)
 *   `gspread` + `google-auth` (Integração Google Sheets)
 *   `BeautifulSoup` + `curl_cffi` (Web scraping dinâmico)
+*   `GitHub Actions` (Orquestração do ETL pipeline)
+
+## ⏳ Automação e Deploy (GitHub Actions)
+
+Todo o processo de extração dos relatórios FipeZAP, cruzamento com os GeoJSONs simplificados e sincronização com a planilha no Flourish é completamente automatizado através do **GitHub Actions**.
+
+O workflow (`.github/workflows/monthly_pipeline.yml`) roda todo dia **06 de cada mês**, com as seguintes etapas e redundâncias:
+1. **Primeira Tentativa (09:00 UTC):** Tenta baixar o relatório e rodar o pipeline através do `run_pipeline.sh`.
+2. **Segunda Tentativa (12:00 UTC):** Caso a FipeZAP atrase a publicação na primeira tentativa, roda como fallback. Possui trava no script para evitar que rode o mesmo trabalho repetitivamente caso já exista um processamento desse mês.
+
+**Engenharia de Conteúdo & Automação**

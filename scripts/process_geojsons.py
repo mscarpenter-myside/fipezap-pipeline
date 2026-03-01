@@ -190,24 +190,31 @@ def main():
     # Carregar correções antecipadamente
     _load_bairro_corrections()
     
-    all_files = list(input_dir.glob("*.geojson"))
-    logging.info(f"Encontrados {len(all_files)} arquivos GeoJSON no total.")
-    
-    # Filtrar apenas capitais
-    geojson_files = []
+    # Ler de múltiplas pastas para pegar tanto os GeoJSONs manuais quanto os extraídos do IBGE
+    all_files = []
+    for source_dir in [base_dir / "data" / "geojsons_brutos", base_dir / "GeoJSONs - Bairros - Municípios"]:
+        if source_dir.exists():
+            all_files.extend(list(source_dir.glob("*.geojson")))
+
+    # Deduplicar arquivos usando o nome da capital (lower) para evitar processar a mesma cidade duas vezes.
+    # Dado que "GeoJSONs - Bairros - Municípios" é processado por último no loop acima, 
+    # as versões manuais vão sobrescrever as do IBGE no dicionário abaixo.
+    unique_files = {}
     capital_names_lower = [c.lower() for c in FIPEZAP_CAPITALS]
-    
+
     for f in all_files:
-        name_lower = f.name.replace(".geojson", "").lower().strip()
-        # Match exato ou se o nome da capital está contido (ex: "São Paulo.geojson")
-        is_capital = False
+        name_lower = f.name.replace(".geojson", "").strip().lower()
+        # Tratamento especial para o RIO DE JANEIRO (que às vezes tem espaço no final)
+        name_lower_clean = name_lower.replace(" ", "")
+
         for cap in capital_names_lower:
-            if cap == name_lower or cap in name_lower:
-                is_capital = True
+            cap_clean = cap.replace(" ", "")
+            if cap_clean == name_lower_clean or cap_clean in name_lower_clean:
+                unique_files[cap] = f # Mantém a última (priorizando manuais)
                 break
-        
-        if is_capital:
-            geojson_files.append(f)
+
+    geojson_files = list(unique_files.values())
+    logging.info(f"Processando {len(geojson_files)} capitais identificadas (desduplicadas).")
             
     logging.info(f"Processando {len(geojson_files)} capitais identificadas.")
     

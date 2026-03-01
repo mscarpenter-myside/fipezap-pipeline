@@ -1,0 +1,48 @@
+name: Monthly FipeZAP ETL
+
+on:
+  schedule:
+    # Primeira tentativa: Dia 6 de cada mês às 9h UTC (6h AM Horário de Brasília)
+    - cron: '0 9 6 * *'
+    # Segunda tentativa: Dia 6 de cada mês às 12h UTC (9h AM Horário de Brasília)
+    - cron: '0 12 6 * *'
+  workflow_dispatch: # Permite rodar manualmente no GitHub
+
+jobs:
+  run-etl:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        # Instalar mapshaper CLI se necessário para a simplificação de geojsons
+        npm install -g mapshaper
+
+    - name: Create credentials directory and file
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      run: |
+        mkdir -p credentials
+        echo "$GOOGLE_CREDENTIALS" > credentials/projeto-mkt-buyer-experience-ab8bb5499148.json
+        
+    - name: Run Pipeline
+      run: |
+        chmod +x run_pipeline.sh
+        ./run_pipeline.sh
+
+    - name: Upload Validation Report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: validation-report
+        path: data/validation_report.txt

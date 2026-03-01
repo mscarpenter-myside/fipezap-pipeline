@@ -88,7 +88,25 @@ class FipeZapScraper:
         return [self.download_dir / item['url'].split('/')[-1] for item in target_urls]
 
 if __name__ == "__main__":
-    scraper = FipeZapScraper()
-    # Pega os últimos 12 meses
-    downloaded_files = asyncio.run(scraper.run(num_months=12))
-    logging.info(f"Processo concluído. Arquivos principais: {downloaded_files}")
+    from datetime import datetime
+    
+    # Verifica se já é dia 6 e se já baixamos o arquivo do mês atual
+    now = datetime.now()
+    current_year_month = now.strftime("%Y%m") # ex: 202603
+    
+    # Assume que o nome do arquivo baixado contém o ano e mês
+    download_dir = Path("data/raw")
+    already_downloaded = False
+    if download_dir.exists():
+        for file in download_dir.glob("*.pdf"):
+            if current_year_month in file.name:
+                already_downloaded = True
+                break
+                
+    if already_downloaded:
+        logging.info(f"O relatório de {current_year_month} já foi baixado. Nenhuma ação necessária na tentativa atual.")
+    else:
+        scraper = FipeZapScraper()
+        # Pega os últimos 12 meses
+        downloaded_files = asyncio.run(scraper.run(num_months=12))
+        logging.info(f"Processo concluído. Arquivos principais: {downloaded_files}")
