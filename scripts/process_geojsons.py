@@ -16,9 +16,9 @@ import unicodedata as _ud
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
 # Caminhos e Constantes
-CRED_FILE    = "/home/mateus/mapas_bairros_mais_valorizados/credentials/projeto-mkt-buyer-experience-ab8bb5499148.json"
+CRED_FILE    = "/home/mateus/fipezap-pipeline/credentials/projeto-mkt-buyer-experience-ab8bb5499148.json"
 OUR_SHEET_ID = "1g5S7UkoNh2lLuwfUr-ssNto4gRZQDnqICqS2rMjdliA"
-base_dir     = Path("/home/mateus/mapas_bairros_mais_valorizados")
+base_dir     = Path("/home/mateus/fipezap-pipeline")
 input_dir    = base_dir / "GeoJSONs - Bairros - Municípios"
 output_dir   = base_dir / "data" / "geojsons_simplificados"
 manifest_path = base_dir / "data" / "geojson_manifest.json"

@@ -1,23 +1,12 @@
 [
     {
-        "cidade": "RIO DE JANEIRO",
-        "arquivo_original": "RIO DE JANEIRO.geojson",
-        "arquivo_final": "data/geojsons_simplificados/RIO DE JANEIRO.geojson",
+        "cidade": "Rio de Janeiro",
+        "arquivo_original": "Rio de Janeiro.geojson",
+        "arquivo_final": "data/geojsons_simplificados/Rio de Janeiro.geojson",
         "tamanho_original_kb": 3243.6,
         "tamanho_final_kb": 162.2,
         "reducao_porcentagem": 95.0,
         "num_features": 172,
-        "coluna_bairro_detectada": "name",
-        "status": "OK"
-    },
-    {
-        "cidade": "Curitiba ",
-        "arquivo_original": "Curitiba .geojson",
-        "arquivo_final": "data/geojsons_simplificados/Curitiba .geojson",
-        "tamanho_original_kb": 710.3,
-        "tamanho_final_kb": 31.0,
-        "reducao_porcentagem": 95.6,
-        "num_features": 72,
         "coluna_bairro_detectada": "name",
         "status": "OK"
     },
@@ -44,17 +33,6 @@
         "status": "OK"
     },
     {
-        "cidade": "SÃO PAULO",
-        "arquivo_original": "SÃO PAULO.geojson",
-        "arquivo_final": "data/geojsons_simplificados/SÃO PAULO.geojson",
-        "tamanho_original_kb": 2618.2,
-        "tamanho_final_kb": 90.3,
-        "reducao_porcentagem": 96.6,
-        "num_features": 117,
-        "coluna_bairro_detectada": "name",
-        "status": "OK"
-    },
-    {
         "cidade": "Belém",
         "arquivo_original": "Belém.geojson",
         "arquivo_final": "data/geojsons_simplificados/Belém.geojson",
@@ -74,6 +52,17 @@
         "reducao_porcentagem": 91.7,
         "num_features": 80,
         "coluna_bairro_detectada": "NM_BAIRRO",
+        "status": "OK"
+    },
+    {
+        "cidade": "Curitiba ",
+        "arquivo_original": "Curitiba .geojson",
+        "arquivo_final": "data/geojsons_simplificados/Curitiba .geojson",
+        "tamanho_original_kb": 710.3,
+        "tamanho_final_kb": 31.0,
+        "reducao_porcentagem": 95.6,
+        "num_features": 72,
+        "coluna_bairro_detectada": "name",
         "status": "OK"
     },
     {
@@ -99,6 +88,17 @@
         "status": "OK"
     },
     {
+        "cidade": "SÃO PAULO",
+        "arquivo_original": "SÃO PAULO.geojson",
+        "arquivo_final": "data/geojsons_simplificados/SÃO PAULO.geojson",
+        "tamanho_original_kb": 2618.2,
+        "tamanho_final_kb": 90.3,
+        "reducao_porcentagem": 96.6,
+        "num_features": 117,
+        "coluna_bairro_detectada": "name",
+        "status": "OK"
+    },
+    {
         "cidade": "Fortaleza",
         "arquivo_original": "Fortaleza.geojson",
         "arquivo_final": "data/geojsons_simplificados/Fortaleza.geojson",
@@ -117,17 +117,6 @@
         "tamanho_final_kb": 30.6,
         "reducao_porcentagem": 90.6,
         "num_features": 48,
-        "coluna_bairro_detectada": "NM_BAIRRO",
-        "status": "OK"
-    },
-    {
-        "cidade": "Cuiabá",
-        "arquivo_original": "Cuiabá.geojson",
-        "arquivo_final": "data/geojsons_simplificados/Cuiabá.geojson",
-        "tamanho_original_kb": 1207.6,
-        "tamanho_final_kb": 51.5,
-        "reducao_porcentagem": 95.7,
-        "num_features": 119,
         "coluna_bairro_detectada": "NM_BAIRRO",
         "status": "OK"
     },
