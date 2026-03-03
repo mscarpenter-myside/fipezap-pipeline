@@ -79,26 +79,27 @@ def fix_bairro_name(name, corrections=None):
     key_stripped = ''.join(c for c in _ud.normalize('NFD', key) if _ud.category(c) != 'Mn')
     return corrections.get(key_stripped, name)
 
-def standardize_bairro(city_name, bairro_name, known_bairros):
-    """Auto-corrige nomes baseando-se no histórico mais antigo para evitar duplicadas por digitação ou truncamento (...)"""
-    if not known_bairros or city_name not in known_bairros:
+def standardize_bairro(bairro_name):
+    """Auto-corrige nomes baseando-se na lista oficial (check_bairros_novos) para evitar duplicadas por digitação ou truncamento (...)"""
+    corrections = _BAIRRO_CORRECTIONS_CACHE or {}
+    if not corrections:
         return bairro_name
         
-    city_bairros = known_bairros[city_name]
-    if bairro_name in city_bairros:
+    all_official_bairros = list(set(corrections.values()))
+    if bairro_name in all_official_bairros:
         return bairro_name
         
     clean_name = bairro_name.replace('...', '').replace('…', '').strip()
     
     # 1. Checa por truncamento (ex: Pedro Ludovico/Bela... -> Pedro Ludovico/Bela Vista)
-    matches = [kb for kb in city_bairros if kb.lower().startswith(clean_name.lower())]
+    matches = [kb for kb in all_official_bairros if kb.lower().startswith(clean_name.lower())]
     if len(matches) == 1:
         logging.info(f"Auto-correção por truncamento: '{bairro_name}' -> '{matches[0]}'")
         return matches[0]
         
     # 2. Checa por similaridade de digitação (ex: pequenas diferenças de acento/espaço)
     import difflib
-    close_matches = difflib.get_close_matches(clean_name, city_bairros, n=1, cutoff=0.88)
+    close_matches = difflib.get_close_matches(clean_name, all_official_bairros, n=1, cutoff=0.88)
     if close_matches:
         logging.info(f"Auto-correção por similaridade: '{bairro_name}' -> '{close_matches[0]}'")
         return close_matches[0]
@@ -117,7 +118,7 @@ def format_variation(v_decimal):
         s = "-0" + s[1:]
     return s
 
-def parse_pdf_data(filepath, known_bairros=None):
+def parse_pdf_data(filepath):
 
     logging.info(f"Fazendo o parsing de: {filepath}")
     data = []
@@ -210,7 +211,7 @@ def parse_pdf_data(filepath, known_bairros=None):
                             # Fix accent-stripped names from PDF
                             bairro_name = fix_bairro_name(bairro_name)
                             # E padroniza de acordo com o histórico da planilha
-                            bairro_name = standardize_bairro(city_name, bairro_name, known_bairros)
+                            bairro_name = standardize_bairro(bairro_name)
                             
                             v = float(var_str.replace(',', '.'))
                             v_decimal = v / 100
@@ -254,7 +255,7 @@ def parse_pdf_data(filepath, known_bairros=None):
                                         # Fix accent-stripped names from PDF
                                         bairro_name = fix_bairro_name(bairro_name)
                                         # E padroniza de acordo com o histórico da planilha
-                                        bairro_name = standardize_bairro(city_name, bairro_name, known_bairros)
+                                        bairro_name = standardize_bairro(bairro_name)
                                         
                                         v = float(var_str.replace(',', '.'))
                                         v_decimal = v / 100
@@ -270,6 +271,7 @@ def parse_pdf_data(filepath, known_bairros=None):
 
 CRED_FILE    = "credentials/projeto-mkt-buyer-experience-ab8bb5499148.json"
 OUR_SHEET_ID = "1g5S7UkoNh2lLuwfUr-ssNto4gRZQDnqICqS2rMjdliA"
+REFERENCE_BQ_SHEET_ID = "1esOzR5cl1NboGfEBxZSHjG76_4DhHXXCGWLLJMsMRn8"
 
 def update_google_sheet(client, sheet, df, tab_name):
     try:
@@ -314,8 +316,8 @@ def reorder_tabs(creds_file, sheet_id):
         logging.error(f"Erro ao reordenar abas: {e}")
 
 def main():
-    # Load canonical bairro names from check_bairros_novos (source of truth)
-    _load_bairro_corrections(CRED_FILE, OUR_SHEET_ID)
+    # Load canonical bairro names from check_bairros_novos (source of truth) using the BigQuery Sheet
+    _load_bairro_corrections(CRED_FILE, REFERENCE_BQ_SHEET_ID)
 
     pdf_files = glob.glob("data/raw/*.pdf")
     if not pdf_files:
@@ -333,26 +335,6 @@ def main():
     
     # Captura abas que já existem para não fazer parsing atoa
     existing_tabs = [w.title for w in sheet.worksheets()]
-    
-    # Carrega nomes canônicos do mês mais antigo para padronização
-    date_tabs = [t for t in existing_tabs if re.match(r'^\d{4}-\d{2}', t)]
-    date_tabs.sort() # Menor data primeiro (mais antigo)
-    known_bairros = {}
-    if date_tabs:
-        oldest_tab = date_tabs[0]
-        logging.info(f"Carregando nomes históricos oficiais da aba mais antiga ({oldest_tab}) para usar como gabarito...")
-        try:
-            ws_oldest = sheet.worksheet(oldest_tab)
-            for row in ws_oldest.get_all_records():
-                c = str(row.get('Cidade', '')).strip()
-                b = str(row.get('Bairro', '')).strip()
-                if c and b:
-                    if c not in known_bairros:
-                        known_bairros[c] = set()
-                    known_bairros[c].add(b)
-            logging.info(f"Carregados {sum(len(v) for v in known_bairros.values())} bairros históricos oficiais.")
-        except Exception as e:
-            logging.error(f"Não foi possível carregar bairros históricos: {e}")
             
     for pdf in pdf_files:
         match = date_regex.search(pdf)
@@ -367,7 +349,7 @@ def main():
                 continue
             
             logging.info(f"\nProcessing {pdf} for tab: {tab_name}")
-            df = parse_pdf_data(pdf, known_bairros)
+            df = parse_pdf_data(pdf)
             
             if not df.empty:
                 update_google_sheet(client, sheet, df, tab_name)
