@@ -79,6 +79,32 @@ def fix_bairro_name(name, corrections=None):
     key_stripped = ''.join(c for c in _ud.normalize('NFD', key) if _ud.category(c) != 'Mn')
     return corrections.get(key_stripped, name)
 
+def standardize_bairro(city_name, bairro_name, known_bairros):
+    """Auto-corrige nomes baseando-se no histórico mais antigo para evitar duplicadas por digitação ou truncamento (...)"""
+    if not known_bairros or city_name not in known_bairros:
+        return bairro_name
+        
+    city_bairros = known_bairros[city_name]
+    if bairro_name in city_bairros:
+        return bairro_name
+        
+    clean_name = bairro_name.replace('...', '').replace('…', '').strip()
+    
+    # 1. Checa por truncamento (ex: Pedro Ludovico/Bela... -> Pedro Ludovico/Bela Vista)
+    matches = [kb for kb in city_bairros if kb.lower().startswith(clean_name.lower())]
+    if len(matches) == 1:
+        logging.info(f"Auto-correção por truncamento: '{bairro_name}' -> '{matches[0]}'")
+        return matches[0]
+        
+    # 2. Checa por similaridade de digitação (ex: pequenas diferenças de acento/espaço)
+    import difflib
+    close_matches = difflib.get_close_matches(clean_name, city_bairros, n=1, cutoff=0.88)
+    if close_matches:
+        logging.info(f"Auto-correção por similaridade: '{bairro_name}' -> '{close_matches[0]}'")
+        return close_matches[0]
+        
+    return bairro_name
+
 
 def format_variation(v_decimal):
     """Format variation: suppress trailing zeros, handle -0 and exact-zero edge cases."""
@@ -91,7 +117,7 @@ def format_variation(v_decimal):
         s = "-0" + s[1:]
     return s
 
-def parse_pdf_data(filepath):
+def parse_pdf_data(filepath, known_bairros=None):
 
     logging.info(f"Fazendo o parsing de: {filepath}")
     data = []
@@ -183,6 +209,8 @@ def parse_pdf_data(filepath):
                                 bairro_name = raw_name
                             # Fix accent-stripped names from PDF
                             bairro_name = fix_bairro_name(bairro_name)
+                            # E padroniza de acordo com o histórico da planilha
+                            bairro_name = standardize_bairro(city_name, bairro_name, known_bairros)
                             
                             v = float(var_str.replace(',', '.'))
                             v_decimal = v / 100
@@ -225,6 +253,8 @@ def parse_pdf_data(filepath):
                                             bairro_name = raw_name
                                         # Fix accent-stripped names from PDF
                                         bairro_name = fix_bairro_name(bairro_name)
+                                        # E padroniza de acordo com o histórico da planilha
+                                        bairro_name = standardize_bairro(city_name, bairro_name, known_bairros)
                                         
                                         v = float(var_str.replace(',', '.'))
                                         v_decimal = v / 100
@@ -241,24 +271,7 @@ def parse_pdf_data(filepath):
 CRED_FILE    = "credentials/projeto-mkt-buyer-experience-ab8bb5499148.json"
 OUR_SHEET_ID = "1g5S7UkoNh2lLuwfUr-ssNto4gRZQDnqICqS2rMjdliA"
 
-def update_google_sheet(df, tab_name):
-    SHEET_ID = "1g5S7UkoNh2lLuwfUr-ssNto4gRZQDnqICqS2rMjdliA"
-    CRED_FILE = "credentials/projeto-mkt-buyer-experience-ab8bb5499148.json"
-    
-    if not os.path.exists(CRED_FILE):
-        logging.error(f"Credentials file not found: {CRED_FILE}")
-        return
-        
-    scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-    creds = Credentials.from_service_account_file(CRED_FILE, scopes=scopes)
-    client = gspread.authorize(creds)
-    
-    try:
-        sheet = client.open_by_key(SHEET_ID)
-    except Exception as e:
-        logging.error(f"Failed to open sheet: {e}")
-        return
-        
+def update_google_sheet(client, sheet, df, tab_name):
     try:
         worksheet = sheet.worksheet(tab_name)
         logging.info(f"Tab {tab_name} exists, clearing it...")
@@ -312,6 +325,35 @@ def main():
     # Regex to find something like fipezap-202601-residencial
     date_regex = re.compile(r'fipezap-(\d{4})(\d{2})-')
     
+    # Conecta no Google Sheets de uma vez
+    scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+    creds = Credentials.from_service_account_file(CRED_FILE, scopes=scopes)
+    client = gspread.authorize(creds)
+    sheet = client.open_by_key(OUR_SHEET_ID)
+    
+    # Captura abas que já existem para não fazer parsing atoa
+    existing_tabs = [w.title for w in sheet.worksheets()]
+    
+    # Carrega nomes canônicos do mês mais antigo para padronização
+    date_tabs = [t for t in existing_tabs if re.match(r'^\d{4}-\d{2}', t)]
+    date_tabs.sort() # Menor data primeiro (mais antigo)
+    known_bairros = {}
+    if date_tabs:
+        oldest_tab = date_tabs[0]
+        logging.info(f"Carregando nomes históricos oficiais da aba mais antiga ({oldest_tab}) para usar como gabarito...")
+        try:
+            ws_oldest = sheet.worksheet(oldest_tab)
+            for row in ws_oldest.get_all_records():
+                c = str(row.get('Cidade', '')).strip()
+                b = str(row.get('Bairro', '')).strip()
+                if c and b:
+                    if c not in known_bairros:
+                        known_bairros[c] = set()
+                    known_bairros[c].add(b)
+            logging.info(f"Carregados {sum(len(v) for v in known_bairros.values())} bairros históricos oficiais.")
+        except Exception as e:
+            logging.error(f"Não foi possível carregar bairros históricos: {e}")
+            
     for pdf in pdf_files:
         match = date_regex.search(pdf)
         if match:
@@ -319,11 +361,16 @@ def main():
             month = match.group(2)
             tab_name = f"{year}-{month}"
             
+            # Se a aba já existe na nuvem, ele desconsidera (conforme solicitado pelo usuário)
+            if tab_name in existing_tabs:
+                logging.info(f"[{tab_name}] já existe no Google Sheets. Pulando parsing do PDF para ignorar processamento duplicado.")
+                continue
+            
             logging.info(f"\nProcessing {pdf} for tab: {tab_name}")
-            df = parse_pdf_data(pdf)
+            df = parse_pdf_data(pdf, known_bairros)
             
             if not df.empty:
-                update_google_sheet(df, tab_name)
+                update_google_sheet(client, sheet, df, tab_name)
             else:
                 logging.warning(f"No data parsed for {pdf}")
                 
