@@ -2,8 +2,8 @@ name: Monthly FipeZAP ETL
 
 on:
   schedule:
-    # Rodar todos os dias às 15h UTC (12h PM Horário de Brasília)
-    - cron: '0 15 * * *'
+    # Rodar todos os dias às 17h UTC (14h Horário de Brasília)
+    - cron: '0 17 * * *'
   workflow_dispatch: # Permite rodar manualmente no GitHub
 
 jobs:
@@ -12,10 +12,10 @@ jobs:
     
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
         
@@ -40,7 +40,7 @@ jobs:
 
     - name: Upload Validation Report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: validation-report
         path: data/validation_report.txt
