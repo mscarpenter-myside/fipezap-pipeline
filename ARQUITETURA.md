@@ -31,7 +31,7 @@ graph TD
 
 ### 2. Conversão e Carga (`etl_pipeline.py`)
 - **Propósito:** Extrair as tabelas embutidas dentro do PDF.
-- **Funcionamento:** Utiliza `pdfplumber` para isolar visualmente as tabelas numéricas do documento em PDF, separando os bairros por capitais. Em seguida, interage diretamente com as APIs do Google (`gspread`) através do Service Account JSON file. Os dados extraídos alimentam a *"Planilha Base FipeZAP"* (`cópia_fipezap_valorizacao_importador`).
+- **Funcionamento:** Utiliza `pdfplumber` para isolar visualmente as tabelas numéricas do documento em PDF, separando os bairros por capitais. Em seguida, interage diretamente com as APIs do Google (`gspread`) através do Service Account JSON file. Os dados extraídos alimentam a *"Planilha Base FipeZAP"* criando abas dinâmicas com o formato mês/ano (ex: `2026-01`, `2025-12`) preservando todo o histórico.
 
 ### 3. Tratamento Geométrico (`process_geojsons.py`)
 - **Propósito:** Sanear as malhas dos bairros IBGE que formarão o mapa 3D no Flourish, efetuando *Simplificação Seletiva* e injeções de vértices.

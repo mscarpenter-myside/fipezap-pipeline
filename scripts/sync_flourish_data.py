@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 CRED_FILE      = "/home/mateus/fipezap-pipeline/credentials/projeto-mkt-buyer-experience-ab8bb5499148.json"
 OUR_SHEET_ID   = "1g5S7UkoNh2lLuwfUr-ssNto4gRZQDnqICqS2rMjdliA"
 FLOURISH_SHEET_ID = "1I98Lt0W5etlohZbAnmtGSPl1bxiGAm_yf2MKOWHlocc"
-DATA_MONTH     = "2026-01"  # Mês base para sincronização
+DATA_MONTH     = None  # Será detectado dinamicamente
 
 base_dir       = Path("/home/mateus/fipezap-pipeline")
 manifest_path  = base_dir / "data" / "geojson_manifest.json"
@@ -32,11 +32,35 @@ def get_fipezap_data(client, city_name):
         logging.error(f"Erro ao buscar dados FipeZAP para {city_name}: {e}")
         return pd.DataFrame()
 
+def get_latest_data_month(client):
+    """Obtém dinamicamente o mês mais recente (ex: '2026-01') da planilha Mestre."""
+    import re
+    try:
+        ss = client.open_by_key(OUR_SHEET_ID)
+        worksheets = ss.worksheets()
+        date_pattern = re.compile(r'^\d{4}-\d{2}$')
+        months = [w.title for w in worksheets if date_pattern.match(w.title)]
+        if not months:
+            raise ValueError("Nenhuma aba com formato YYYY-MM encontrada.")
+        months.sort(reverse=True)
+        return months[0]
+    except Exception as e:
+        logging.error(f"Erro ao obter o mês mais recente: {e}")
+        return None
+
 def main():
     # Autenticação
     scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
     creds = Credentials.from_service_account_file(CRED_FILE, scopes=scopes)
     client = gspread.authorize(creds)
+    
+    global DATA_MONTH
+    DATA_MONTH = get_latest_data_month(client)
+    if not DATA_MONTH:
+        logging.error("Abortando sincronização devido à falta do mês base.")
+        return
+        
+    logging.info(f"Sincronizando Flourish usando os dados da FipeZAP do mês: {DATA_MONTH}")
     
     # Carregar Manifesto
     if not manifest_path.exists():
