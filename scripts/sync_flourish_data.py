@@ -18,15 +18,11 @@ DATA_MONTH     = None  # Será detectado dinamicamente
 base_dir       = Path("/home/mateus/fipezap-pipeline")
 manifest_path  = base_dir / "data" / "geojson_manifest.json"
 
-def get_fipezap_data(client, city_name):
-    """Busca os dados do FipeZAP para uma capital específica no mês base."""
+def get_fipezap_data(df_full, city_name):
+    """Filtra os dados do FipeZAP para uma capital específica usando o DataFrame completo do mês."""
     try:
-        ws = client.open_by_key(OUR_SHEET_ID).worksheet(DATA_MONTH)
-        data = ws.get_all_records()
-        df = pd.DataFrame(data)
-        
         # Filtrar pela cidade (buscamos match parcial já que o GeoJSON diz 'São Paulo' e a planilha 'São Paulo (SP)')
-        df_city = df[df['Cidade'].str.contains(city_name, case=False, na=False)].copy()
+        df_city = df_full[df_full['Cidade'].str.contains(city_name, case=False, na=False)].copy()
         return df_city
     except Exception as e:
         logging.error(f"Erro ao buscar dados FipeZAP para {city_name}: {e}")
@@ -62,6 +58,17 @@ def main():
         
     logging.info(f"Sincronizando Flourish usando os dados da FipeZAP do mês: {DATA_MONTH}")
     
+    # Busca todos os dados da planilha base do mês de umA SÓ VEZ para não estourar o limite de API do Google (429 Too Many Requests)
+    try:
+        ss_base = client.open_by_key(OUR_SHEET_ID)
+        ws_base = ss_base.worksheet(DATA_MONTH)
+        all_data = ws_base.get_all_records()
+        df_full = pd.DataFrame(all_data)
+        logging.info(f"Dados FipeZAP carregados na memória ({len(df_full)} linhas).")
+    except Exception as e:
+        logging.error(f"Erro fatal ao buscar a aba {DATA_MONTH}: {e}")
+        return
+        
     # Carregar Manifesto
     if not manifest_path.exists():
         logging.error("Manifesto não encontrado. Rode process_geojsons.py primeiro.")
@@ -71,6 +78,9 @@ def main():
         manifest = json.load(f)
         
     master_ss = client.open_by_key(FLOURISH_SHEET_ID)
+    
+    # Pega as worksheets do flourish de uma vez para não gastar chamadas API dentro do loop
+    worksheets = master_ss.worksheets()
     
     for item in manifest:
         if item["status"] != "OK": continue
@@ -91,8 +101,8 @@ def main():
         
         neighborhoods_data = gdf[['nome_bairro', 'latitude', 'longitude']].to_dict('records')
         
-        # 2. Buscar dados FipeZAP
-        fipe_df = get_fipezap_data(client, city_name)
+        # 2. Buscar dados FipeZAP (usando df em memória)
+        fipe_df = get_fipezap_data(df_full, city_name)
         
         # Calcular posição (Ranking) baseado no Valor do m²
         if not fipe_df.empty:
@@ -108,7 +118,10 @@ def main():
         for item_geo in neighborhoods_data:
             bairro = item_geo['nome_bairro']
             # Procurar nos dados do FipeZAP
-            match = fipe_df[fipe_df['Bairro'] == bairro]
+            if fipe_df.empty or 'Bairro' not in fipe_df.columns:
+                match = pd.DataFrame()
+            else:
+                match = fipe_df[fipe_df['Bairro'] == bairro]
             
             if not match.empty:
                 row_data = match.iloc[0].to_dict()
@@ -138,9 +151,9 @@ def main():
         # Preparar aba (limpar se já existir, criar se não)
         tab_name = city_name[:100] # Limite de nome de aba
         
-        # Encontrar a worksheet ignorando o case
+        # Encontrar a worksheet ignorando o case no array armazenado
         existing_ws = None
-        for w in master_ss.worksheets():
+        for w in worksheets:
             if w.title.lower() == tab_name.lower():
                 existing_ws = w
                 break
