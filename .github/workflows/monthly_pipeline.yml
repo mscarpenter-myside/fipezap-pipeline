@@ -2,10 +2,8 @@ name: Monthly FipeZAP ETL
 
 on:
   schedule:
-    # Primeira tentativa: Dia 6 de cada mês às 9h UTC (6h AM Horário de Brasília)
-    - cron: '0 9 6 * *'
-    # Segunda tentativa: Dia 6 de cada mês às 12h UTC (9h AM Horário de Brasília)
-    - cron: '0 12 6 * *'
+    # Rodar todos os dias às 14h UTC (11h AM Horário de Brasília)
+    - cron: '0 14 * * *'
   workflow_dispatch: # Permite rodar manualmente no GitHub
 
 jobs:

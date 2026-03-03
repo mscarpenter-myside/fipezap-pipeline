@@ -132,6 +132,18 @@ def process_geojson(file_path):
         corrections = _load_bairro_corrections()
         gdf['nome_bairro'] = gdf['nome_bairro'].apply(lambda x: fix_bairro_name(x, corrections))
         
+        # Edge case handler para São Paulo (Jardins e Paraíso)
+        if "são paulo" in file_name.lower() or "sao paulo" in file_name.lower():
+            # Jardins não é bairro oficial, mapeamos para a geometria do Jardim Paulista
+            gdf.loc[gdf['nome_bairro'] == 'Jardim Paulista', 'nome_bairro'] = 'Jardins'
+            
+            # Paraíso faz parte da Vila Mariana, duplicamos a geometria para ter ambos no mapa
+            vila_mariana = gdf[gdf['nome_bairro'] == 'Vila Mariana']
+            if not vila_mariana.empty:
+                paraiso = vila_mariana.copy()
+                paraiso['nome_bairro'] = 'Paraíso'
+                gdf = pd.concat([gdf, paraiso], ignore_index=True)
+        
         # Identificar quais bairros são "Destaque" (estão no FipeZAP)
         # Usamos os próprios valores das correções como referência de nomes canônicos
         canonical_meta_names = set(corrections.values())

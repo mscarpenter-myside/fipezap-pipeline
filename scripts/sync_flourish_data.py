@@ -10,12 +10,12 @@ from google.oauth2.service_account import Credentials
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
 # Caminhos e Constantes
-CRED_FILE      = "/home/mateus/mapas_bairros_mais_valorizados/credentials/projeto-mkt-buyer-experience-ab8bb5499148.json"
+CRED_FILE      = "/home/mateus/fipezap-pipeline/credentials/projeto-mkt-buyer-experience-ab8bb5499148.json"
 OUR_SHEET_ID   = "1g5S7UkoNh2lLuwfUr-ssNto4gRZQDnqICqS2rMjdliA"
 FLOURISH_SHEET_ID = "1I98Lt0W5etlohZbAnmtGSPl1bxiGAm_yf2MKOWHlocc"
 DATA_MONTH     = "2026-01"  # Mês base para sincronização
 
-base_dir       = Path("/home/mateus/mapas_bairros_mais_valorizados")
+base_dir       = Path("/home/mateus/fipezap-pipeline")
 manifest_path  = base_dir / "data" / "geojson_manifest.json"
 
 def get_fipezap_data(client, city_name):
@@ -113,11 +113,19 @@ def main():
         
         # Preparar aba (limpar se já existir, criar se não)
         tab_name = city_name[:100] # Limite de nome de aba
-        try:
-            ws = master_ss.worksheet(tab_name)
+        
+        # Encontrar a worksheet ignorando o case
+        existing_ws = None
+        for w in master_ss.worksheets():
+            if w.title.lower() == tab_name.lower():
+                existing_ws = w
+                break
+                
+        if existing_ws:
+            ws = existing_ws
             ws.clear()
-        except gspread.exceptions.WorksheetNotFound:
-            ws = master_ss.add_worksheet(title=tab_name, rows="100", cols="20")
+        else:
+            ws = master_ss.add_worksheet(title=tab_name.title(), rows="100", cols="20")
             
         # Escrever dados
         ws.update([final_df.columns.values.tolist()] + final_df.values.tolist())
